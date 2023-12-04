@@ -63,6 +63,7 @@ function writePackageJsonPlugin() {
 					path.join(OUT_DIR, 'package.json'),
 					JSON.stringify(result, null, 2),
 				);
+				console.log('Wrote package.json', result.version);
 			});
 		},
 	};
