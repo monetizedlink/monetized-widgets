@@ -1,0 +1,55 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'
+        required: true
+        default: 'patch'
+        type: choice
+        options: [patch, minor, major]
+
+concurrency: 'release'
+permissions:
+  id-token: write
+  contents: write
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: git config
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install
+      - run: pnpm version ${{ inputs.version }}
+
+      - run: pnpm build
+      - run: pnpm build:release
+
+      - name: Publish @monetized/api
+        run: npm publish --access=public --provenance
+        working-directory: output/api
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish @monetized/widgets
+        run: npm publish --access=public --provenance
+        working-directory: output/widgets
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - run: git push origin HEAD
+      - run: git push --tags
