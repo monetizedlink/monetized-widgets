@@ -57,7 +57,7 @@ function writePackageJsonPlugin() {
 		setup(build) {
 			build.onEnd(() => {
 				const result = {
-					name: '@monetized/api',
+					name: '@monetized/widgets',
 					...getCommonPkgJsonFields(pkgJson),
 					type: 'module',
 					dependencies: {},
